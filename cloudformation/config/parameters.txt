@@ -1,1 +1,2 @@
-export SYSTEM_NAME=common
+export PRODUCT_NAME=arukun
+export SERVICE_NAME=common
