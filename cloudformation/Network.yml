@@ -1,0 +1,267 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: common networks
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "default"
+        Parameters:
+          - Env
+
+Parameters:
+  ###############################
+  # 外部からのパラメーター
+  ###############################
+  Env:
+    Type: String
+    Description: 環境種別
+  SystemName:
+    Type: String
+    Description: システム名
+
+  ###############################
+  # パラメーター
+  ###############################
+  VPCCidrBlock:
+    Type: String
+    Default: 172.16.0.0/16
+  PublicSubnetAName:
+    Type: String
+    Default: public-a
+  PublicSubnetCName:
+    Type: String
+    Default: public-c
+  PrivateSubnetAName:
+    Type: String
+    Default: private-a
+  PrivateSubnetCName:
+    Type: String
+    Default: private-c
+  PublicRouteTableAName:
+    Type: String
+    Default: public-a
+  PublicRouteTableCName:
+    Type: String
+    Default: public-c
+  PrivateRouteTableAName:
+    Type: String
+    Default: private-a
+  PrivateRouteTableCName:
+    Type: String
+    Default: private-c
+
+###############################
+# リソース
+###############################
+Resources:
+  ###############################
+  # VPC
+  ###############################
+  ### VPC ###
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCidrBlock
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Ref SystemName
+        - Key: System
+          Value: !Ref SystemName
+        - Key: Env
+          Value: !Ref Env
+
+  ###############################
+  # InternetGateway
+  ###############################
+  ### InternetGateway ###
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Ref SystemName
+        - Key: System
+          Value: !Ref SystemName
+        - Key: Env
+          Value: !Ref Env
+
+  ### VPCGatewayAttachment ###
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  ###############################
+  # Subnet
+  ###############################
+  ### PublicSubnetA ###
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: { "Fn::Select" : ["0", { "Fn::GetAZs" : { "Ref" : "AWS::Region" } } ] }
+      CidrBlock: !Select [ 0, !Cidr [ !GetAtt VPC.CidrBlock, 6, 8 ]]
+      Tags:
+        - Key: Name
+          Value: !Sub ${SystemName}-${PublicSubnetAName}
+        - Key: System
+          Value: !Ref SystemName
+        - Key: Env
+          Value: !Ref Env
+      VpcId: !Ref VPC
+
+  ### PublicSubnetC ###
+  PublicSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: { "Fn::Select" : ["1", { "Fn::GetAZs" : { "Ref" : "AWS::Region" } } ] }
+      CidrBlock: !Select [ 1, !Cidr [ !GetAtt VPC.CidrBlock, 6, 8 ]]
+      Tags:
+        - Key: Name
+          Value: !Sub ${SystemName}-${PublicSubnetCName}
+        - Key: System
+          Value: !Ref SystemName
+        - Key: Env
+          Value: !Ref Env
+      VpcId: !Ref VPC
+
+  ### PrivateSubnetA ###
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: { "Fn::Select" : ["0", { "Fn::GetAZs" : { "Ref" : "AWS::Region" } } ] }
+      CidrBlock: !Select [ 2, !Cidr [ !GetAtt VPC.CidrBlock, 6, 8 ]]
+      Tags:
+        - Key: Name
+          Value: !Sub ${SystemName}-${PrivateSubnetAName}
+        - Key: System
+          Value: !Ref SystemName
+        - Key: Env
+          Value: !Ref Env
+      VpcId: !Ref VPC
+
+  ### PrivateSubnetC ###
+  PrivateSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: { "Fn::Select" : ["1", { "Fn::GetAZs" : { "Ref" : "AWS::Region" } } ] }
+      CidrBlock: !Select [ 3, !Cidr [ !GetAtt VPC.CidrBlock, 6, 8 ]]
+      Tags:
+        - Key: Name
+          Value: !Sub ${SystemName}-${PrivateSubnetCName}
+        - Key: System
+          Value: !Ref SystemName
+        - Key: Env
+          Value: !Ref Env
+      VpcId: !Ref VPC
+
+  ###############################
+  # RouteTable
+  ###############################
+  ### PublicRouteTableA ###
+  PublicRouteTableA:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${SystemName}-${PublicRouteTableAName}
+        - Key: System
+          Value: !Ref SystemName
+        - Key: Env
+          Value: !Ref Env
+      VpcId: !Ref VPC
+
+  ### PublicRouteTableC ###
+  PublicRouteTableC:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${SystemName}-${PublicRouteTableCName}
+        - Key: System
+          Value: !Ref SystemName
+        - Key: Env
+          Value: !Ref Env
+      VpcId: !Ref VPC
+
+  ### PrivateRouteTableA ###
+  PrivateRouteTableA:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${SystemName}-${PrivateRouteTableAName}
+        - Key: System
+          Value: !Ref SystemName
+        - Key: Env
+          Value: !Ref Env
+      VpcId: !Ref VPC
+
+  ### PrivateRouteTableC ###
+  PrivateRouteTableC:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${SystemName}-${PrivateRouteTableCName}
+        - Key: System
+          Value: !Ref SystemName
+        - Key: Env
+          Value: !Ref Env
+      VpcId: !Ref VPC
+
+  ### PublicRouteA ###
+  PublicRouteA:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTableA
+
+  ### PublicRouteC ###
+  PublicRouteC:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PublicRouteTableC
+
+  ### PublicRouteTableAAssociation ###
+  PublicSubnetRouteTableAAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTableA
+      SubnetId: !Ref PublicSubnetA
+
+  ### PublicRouteTableCAssociation ###
+  PublicSubnetRouteTableCAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTableC
+      SubnetId: !Ref PublicSubnetC
+
+  ### PrivateRouteTableAAssociation ###
+  PrivateSubnetRouteTableAAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableA
+      SubnetId: !Ref PrivateSubnetA
+
+  ### PrivateRouteTableCAssociation ###
+  PrivateSubnetRouteTableCAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableC
+      SubnetId: !Ref PrivateSubnetC
+
+###############################
+# 出力
+###############################
+Outputs:
+  VPCCidrBlock:
+    Value: !GetAtt VPC.CidrBlock
