@@ -1,1 +1,2 @@
+export PRODUCT_NAME=arukun
 export SYSTEM_NAME=common
