@@ -72,29 +72,11 @@ fi
 TEMPLATE_PATH=""
 STACK_NAME=""
 
-# Application.yml
-if [ "${CFN}" = "app" ];
+# Network.yml
+if [ "${CFN}" = "net" ];
 then
-    TEMPLATE_PATH='./cloudformation/Application.yml'
-    STACK_NAME="${PRODUCT_NAME}-${SERVICE_NAME}-application-${ENV}"
-
-# Securiy.yml
-elif [ "${CFN}" = "sec" ];
-then
-    TEMPLATE_PATH='./cloudformation/Security.yml'
-    STACK_NAME="${PRODUCT_NAME}-${SERVICE_NAME}-security-${ENV}"
-
-# ECR.yml
-elif [ "${CFN}" = "ecr" ];
-then
-    TEMPLATE_PATH='./cloudformation/ECR.yml'
-    STACK_NAME="${PRODUCT_NAME}-${SERVICE_NAME}-ecr-${ENV}"
-
-# Monitoring.yml
-elif [ "${CFN}" = "mon" ];
-then
-    TEMPLATE_PATH='./cloudformation/Monitoring.yml'
-    STACK_NAME="${PRODUCT_NAME}-${SERVICE_NAME}-monitoring-${ENV}"
+    TEMPLATE_PATH='./cloudformation/Network.yml'
+    STACK_NAME="${PRODUCT_NAME}-${SERVICE_NAME}-network-${ENV}"
 
 else
     echo "error->cfn not supported->${CFN}"
@@ -103,8 +85,10 @@ fi
 
 # デプロイ
 OUTPUT=""
-OUTPUT=$(rain deploy ${TEMPLATE_PATH} ${STACK_NAME} -y -p ${PROFILE} --params Env=${ENV},ServiceName=${SERVICE_NAME} 2>&1)
+OUTPUT=$(rain deploy ${TEMPLATE_PATH} ${STACK_NAME} -y -p ${PROFILE} --params Env=${ENV},ServiceName=${SERVICE_NAME},ProductName=${PRODUCT_NAME} 2>&1)
 RESULT=$?
+
+echo "rain deploy ${TEMPLATE_PATH} ${STACK_NAME} -y -p ${PROFILE} --params Env=${ENV},ServiceName=${SERVICE_NAME},ProductName=${PRODUCT_NAME}"
 
 # CloudFormationに変更がなかった場合もエラーになるため、エラーメッセージで判定して回避
 if [ "${OUTPUT}" == "error creating changeset: No updates are to be performed." ] || [ "$OUTPUT" == "error creating changeset: The submitted information didn't contain changes. Submit different information to create a change set." ];

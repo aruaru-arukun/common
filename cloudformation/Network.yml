@@ -1,15 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: common networks
 
-Metadata:
-  AWS::CloudFormation::Interface:
-    ParameterGroups:
-      -
-        Label:
-          default: "default"
-        Parameters:
-          - Env
-
 Parameters:
   ###############################
   # 外部からのパラメーター
@@ -17,16 +8,22 @@ Parameters:
   Env:
     Type: String
     Description: 環境種別
-  SystemName:
+  ServiceName:
     Type: String
-    Description: システム名
+    Description: サービス名
+  ProductName:
+    Type: String
+    Description: プロダクト名
 
   ###############################
   # パラメーター
   ###############################
-  VPCCidrBlock:
+  VPCName:
     Type: String
-    Default: 172.16.0.0/16
+    Default: vpc
+  InternetGatewayName:
+    Type: String
+    Default: igw
   PublicSubnetAName:
     Type: String
     Default: public-a
@@ -63,15 +60,17 @@ Resources:
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: !Ref VPCCidrBlock
+      CidrBlock: 172.16.0.0/16
       EnableDnsHostnames: true
       EnableDnsSupport: true
       InstanceTenancy: default
       Tags:
         - Key: Name
-          Value: !Ref SystemName
-        - Key: System
-          Value: !Ref SystemName
+          Value: !Sub ${ProductName}-${ServiceName}-${VPCName}-${Env}
+        - Key: ServiceName
+          Value: !Ref ServiceName
+        - Key: ProductName
+          Value: !Ref ProductName
         - Key: Env
           Value: !Ref Env
 
@@ -84,9 +83,11 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: !Ref SystemName
-        - Key: System
-          Value: !Ref SystemName
+          Value: !Sub ${ProductName}-${ServiceName}-${InternetGatewayName}-${Env}
+        - Key: ServiceName
+          Value: !Ref ServiceName
+        - Key: ProductName
+          Value: !Ref ProductName
         - Key: Env
           Value: !Ref Env
 
@@ -108,9 +109,11 @@ Resources:
       CidrBlock: !Select [ 0, !Cidr [ !GetAtt VPC.CidrBlock, 6, 8 ]]
       Tags:
         - Key: Name
-          Value: !Sub ${SystemName}-${PublicSubnetAName}
-        - Key: System
-          Value: !Ref SystemName
+          Value: !Sub ${ProductName}-${ServiceName}-${PublicSubnetAName}-${Env}
+        - Key: ServiceName
+          Value: !Ref ServiceName
+        - Key: ProductName
+          Value: !Ref ProductName
         - Key: Env
           Value: !Ref Env
       VpcId: !Ref VPC
@@ -123,9 +126,11 @@ Resources:
       CidrBlock: !Select [ 1, !Cidr [ !GetAtt VPC.CidrBlock, 6, 8 ]]
       Tags:
         - Key: Name
-          Value: !Sub ${SystemName}-${PublicSubnetCName}
-        - Key: System
-          Value: !Ref SystemName
+          Value: !Sub ${ProductName}-${ServiceName}-${PublicSubnetCName}-${Env}
+        - Key: ServiceName
+          Value: !Ref ServiceName
+        - Key: ProductName
+          Value: !Ref ProductName
         - Key: Env
           Value: !Ref Env
       VpcId: !Ref VPC
@@ -138,9 +143,11 @@ Resources:
       CidrBlock: !Select [ 2, !Cidr [ !GetAtt VPC.CidrBlock, 6, 8 ]]
       Tags:
         - Key: Name
-          Value: !Sub ${SystemName}-${PrivateSubnetAName}
-        - Key: System
-          Value: !Ref SystemName
+          Value: !Sub ${ProductName}-${ServiceName}-${PrivateSubnetAName}-${Env}
+        - Key: ServiceName
+          Value: !Ref ServiceName
+        - Key: ProductName
+          Value: !Ref ProductName
         - Key: Env
           Value: !Ref Env
       VpcId: !Ref VPC
@@ -153,9 +160,11 @@ Resources:
       CidrBlock: !Select [ 3, !Cidr [ !GetAtt VPC.CidrBlock, 6, 8 ]]
       Tags:
         - Key: Name
-          Value: !Sub ${SystemName}-${PrivateSubnetCName}
-        - Key: System
-          Value: !Ref SystemName
+          Value: !Sub ${ProductName}-${ServiceName}-${PrivateSubnetCName}-${Env}
+        - Key: ServiceName
+          Value: !Ref ServiceName
+        - Key: ProductName
+          Value: !Ref ProductName
         - Key: Env
           Value: !Ref Env
       VpcId: !Ref VPC
@@ -169,9 +178,11 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: !Sub ${SystemName}-${PublicRouteTableAName}
-        - Key: System
-          Value: !Ref SystemName
+          Value: !Sub ${ProductName}-${ServiceName}-${PublicRouteTableAName}-${Env}
+        - Key: ServiceName
+          Value: !Ref ServiceName
+        - Key: ProductName
+          Value: !Ref ProductName
         - Key: Env
           Value: !Ref Env
       VpcId: !Ref VPC
@@ -182,9 +193,11 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: !Sub ${SystemName}-${PublicRouteTableCName}
-        - Key: System
-          Value: !Ref SystemName
+          Value: !Sub ${ProductName}-${ServiceName}-${PublicRouteTableCName}-${Env}
+        - Key: ServiceName
+          Value: !Ref ServiceName
+        - Key: ProductName
+          Value: !Ref ProductName
         - Key: Env
           Value: !Ref Env
       VpcId: !Ref VPC
@@ -195,9 +208,11 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: !Sub ${SystemName}-${PrivateRouteTableAName}
-        - Key: System
-          Value: !Ref SystemName
+          Value: !Sub ${ProductName}-${ServiceName}-${PublicRouteTableCName}-${Env}
+        - Key: ServiceName
+          Value: !Ref ServiceName
+        - Key: ProductName
+          Value: !Ref ProductName
         - Key: Env
           Value: !Ref Env
       VpcId: !Ref VPC
@@ -208,9 +223,11 @@ Resources:
     Properties:
       Tags:
         - Key: Name
-          Value: !Sub ${SystemName}-${PrivateRouteTableCName}
-        - Key: System
-          Value: !Ref SystemName
+          Value: !Sub ${ProductName}-${ServiceName}-${PrivateRouteTableCName}-${Env}
+        - Key: ServiceName
+          Value: !Ref ServiceName
+        - Key: ProductName
+          Value: !Ref ProductName
         - Key: Env
           Value: !Ref Env
       VpcId: !Ref VPC
