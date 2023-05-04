@@ -280,5 +280,11 @@ Resources:
 # 出力
 ###############################
 Outputs:
-  VPCCidrBlock:
-    Value: !GetAtt VPC.CidrBlock
+  VPCId:
+    Value: !Ref VPC
+    Export:
+      Name: !Sub ${ProductName}-${ServiceName}-${VPCName}-${Env}
+  PublicSubnetAId:
+    Value: !GetAtt PublicSubnetA.SubnetId
+    Export:
+      Name: !Sub ${ProductName}-${ServiceName}-${PublicSubnetAName}-${Env}
